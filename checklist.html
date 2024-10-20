@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist for Machine</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f8f9fa; /* Light background */
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      text-align: center;
+      margin: 40px 0;
+      color: #333; /* Dark text color */
+    }
+    .nav-bar {
+      background-color: #4CAF50; /* Green navbar */
+      overflow: hidden;
+      padding: 10px 0;
+    }
+    .nav-bar a {
+      float: left;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .nav-bar a:hover {
+      background-color: #45a049; /* Darker green on hover */
+    }
+    .nav-bar a.active {
+      background-color: #45a049; /* Active link style */
+    }
+    .checklist-container {
+      max-width: 600px;
+      margin: 0 auto; /* Center the container */
+      background-color: #ffffff; /* White background for container */
+      padding: 20px;
+      border-radius: 12px; /* Rounded corners */
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    }
+    .input-field {
+      margin-bottom: 15px;
+    }
+    .input-field label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555; /* Slightly lighter text for labels */
+    }
+    .input-field input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px; /* Rounded corners */
+      font-size: 16px;
+    }
+    button {
+      padding: 12px 20px;
+      background-color: #4CAF50; /* Green button */
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px; /* Rounded corners */
+      font-size: 16px;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049; /* Darker green on hover */
+    }
+    /* Checklist styling */
+    .checklist {
+      margin-top: 20px;
+    }
+    label {
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
+    input[type="checkbox"] {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Menu -->
+  <div class="nav-bar">
+    <a href="page.html">Home</a>
+    <a href="javascript:history.back()">Back</a>
+  </div>
+
+  <h1 id="machine-name"></h1>
+
+  <div class="checklist-container">
+    <div class="input-field">
+      <label for="engineer-name">Engineer Name:</label>
+      <input type="text" id="engineer-name" placeholder="Enter your name" required>
+    </div>
+    <div class="input-field">
+      <label for="date">Date:</label>
+      <input type="date" id="date" required>
+    </div>
+    <div class="input-field">
+      <label for="place">Place:</label>
+      <input type="text" id="place" placeholder="Enter place" required>
+    </div>
+    <div class="input-field">
+      <label for="id-number">ID Number:</label>
+      <input type="text" id="id-number" placeholder="Enter ID number" required>
+    </div>
+
+    <div class="checklist" id="checklist">
+      <!-- Dynamic checklist items will be inserted here -->
+    </div>
+
+    <button onclick="generatePDF()">Download as PDF</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // Define checklists for each machine
+    const checklists = {
+      "Machine 1": [
+        { id: "item1", label: "Task 1: Inspect engine" },
+        { id: "item2", label: "Task 2: Check oil levels" },
+        { id: "item3", label: "Task 3: Test safety controls" },
+        { id: "item4", label: "Task 4: Clean filters" },
+      ],
+      "Machine 2": [
+        { id: "item1", label: "Task 1: Check fuel levels" },
+        { id: "item2", label: "Task 2: Inspect tires" },
+        { id: "item3", label: "Task 3: Test brakes" },
+        { id: "item4", label: "Task 4: Clean air filter" },
+      ],
+      "Machine 3": [
+        { id: "item1", label: "Task 1: Check hydraulic fluid" },
+        { id: "item2", label: "Task 2: Inspect belts" },
+        { id: "item3", label: "Task 3: Check electrical systems" },
+        { id: "item4", label: "Task 4: Clean battery terminals" },
+      ],
+      "Machine 4": [
+        { id: "item1", label: "Task 1: Inspect safety guards" },
+        { id: "item2", label: "Task 2: Test emergency stop" },
+        { id: "item3", label: "Task 3: Clean machine exterior" },
+        { id: "item4", label: "Task 4: Check fluid leaks" },
+      ]
+    };
+
+    // Get machine name from URL parameters
+    function getMachineName() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('machine');
+    }
+
+    // Set the machine name in the heading and populate checklist
+    function loadChecklist() {
+      const machineName = getMachineName();
+      document.getElementById('machine-name').innerText = `Checklist for ${machineName}`;
+      
+      const checklistDiv = document.getElementById('checklist');
+      checklists[machineName].forEach(item => {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" id="${item.id}"> ${item.label}`;
+        checklistDiv.appendChild(label);
+      });
+    }
+
+    // Call the function to load the checklist on page load
+    loadChecklist();
+
+    function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const machineName = getMachineName();
+      const engineerName = document.getElementById('engineer-name').value; // Get engineer name from input
+      const date = document.getElementById('date').value; // Get date from input
+      const place = document.getElementById('place').value; // Get place from input
+      const idNumber = document.getElementById('id-number').value; // Get ID number from input
+      const companyName = "Gateway Advertising"; // Replace with the actual company name
+
+      // Add company name as header
+      doc.setFontSize(18);
+      doc.text(companyName, 20, 10); 
+
+      // Add machine name
+      doc.setFontSize(16);
+      doc.text(`Checklist for ${machineName}`, 20, 30);
+      
+      // Add engineer details
+      doc.setFontSize(12);
+      doc.text(`Engineer Name: ${engineerName}`, 20, 50);
+      doc.text(`Date: ${date}`, 20, 60);
+      doc.text(`Place: ${place}`, 20, 70);
+      doc.text(`ID Number: ${idNumber}`, 20, 80);
+
+      // Draw table for checklist items
+      doc.setFontSize(12);
+      doc.text("No.", 20, 90);
+      doc.text("Task Description", 40, 90);
+      doc.text("Status", 150, 90);
+      
+      // Draw horizontal line
+      doc.line(20, 92, 190, 92); // Draw line below header
+
+      let yPosition = 100; // Starting position for checklist items
+
+      checklists[machineName].forEach((item, index) => {
+        const checkbox = document.getElementById(item.id);
+        const status = checkbox.checked ? "Done" : "Not Done";
+        doc.text((index + 1).toString(), 20, yPosition); // Serial number
+        doc.text(item.label, 40, yPosition); // Task description
+        doc.text(status, 150, yPosition); // Status
+        yPosition += 10; // Move down for the next row
+      });
+
+      // Save the PDF
+      doc.save(`${machineName}_checklist.pdf`);
+    }
+  </script>
+</body>
+</html>
